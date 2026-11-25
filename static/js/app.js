@@ -1,18 +1,40 @@
 const $ = (sel) => document.querySelector(sel);
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// The URL that produced the current quality list. Media indexes are only valid for this URL,
-// so a later edit to the input must not be sent with old indexes.
+// Where the API lives. Empty means "the server that delivered this page".
+// When the page is hosted elsewhere (GitHub Pages), static/js/config.js sets it.
+const API_BASE = String(window.XENO_API_BASE || "").replace(/\/+$/, "");
+const BACKEND_MISSING = !API_BASE && /github\.io$/i.test(location.hostname);
+const BACKEND_HINT =
+  "Backend is not set up for this page. Set XENO_API_BASE in static/js/config.js to your XENO API URL.";
+
+// Media indexes are only valid for the URL they were extracted from.
 let extractedUrl = "";
 
-async function postJSON(url, body) {
-  const r = await fetch(url, {
+function api(path) {
+  return API_BASE + path;
+}
+
+async function request(path, options = {}) {
+  if (BACKEND_MISSING) throw new Error(BACKEND_HINT);
+  let response;
+  try {
+    response = await fetch(api(path), options);
+  } catch {
+    throw new Error(
+      "Cannot reach the XENO API. Check that the server is running and that its XENO_CORS_ORIGINS includes this site."
+    );
+  }
+  const data = await response.json().catch(() => ({}));
+  return { ok: response.ok, data };
+}
+
+function postJSON(path, body) {
+  return request(path, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
-  const data = await r.json().catch(() => ({}));
-  return { ok: r.ok, data };
 }
 
 function errorText(data, fallback) {
@@ -126,7 +148,7 @@ function renderComplete(el, job) {
 
   const link = document.createElement("a");
   link.className = "save-link";
-  link.href = job.file_url;
+  link.href = api(job.file_url);
   link.setAttribute("download", "");
   link.textContent = "Save MP4 ↓";
 
@@ -136,9 +158,8 @@ function renderComplete(el, job) {
 async function pollJob(id, el) {
   for (let i = 0; i < 240; i += 1) {
     await sleep(1500);
-    const r = await fetch(`/api/v1/download/${encodeURIComponent(id)}`);
-    const job = await r.json().catch(() => ({}));
-    if (!r.ok) throw new Error(errorText(job, "Status check failed"));
+    const { ok, data: job } = await request(`/api/v1/download/${encodeURIComponent(id)}`);
+    if (!ok) throw new Error(errorText(job, "Status check failed"));
     if (job.status === "completed") return renderComplete(el, job);
     if (job.status === "failed") throw new Error(job.error || "Download failed");
     renderProgress(el, job);
@@ -255,7 +276,18 @@ $("#dform").addEventListener("submit", async (e) => {
   });
 });
 
-fetch("/api/v1/health")
-  .then((r) => r.json())
-  .then((d) => { $("#health").textContent = JSON.stringify(d, null, 2); })
-  .catch(() => { $("#health").textContent = "API unavailable"; });
+function loadHealth() {
+  const out = $("#health");
+  if (BACKEND_MISSING) {
+    out.textContent = BACKEND_HINT;
+    return;
+  }
+  request("/api/v1/health")
+    .then(({ ok, data }) => {
+      out.textContent = ok ? JSON.stringify(data, null, 2) : "API unavailable";
+    })
+    .catch((err) => {
+      out.textContent = err.message;
+    });
+}
+loadHealth();

@@ -93,3 +93,14 @@ XENO v7.1 FIX LOG
 - UI: quality picker, progress bar, save button, keyboard focus ring, light/dark memory, reduced-motion support, mobile polish.
 - UI: the quality list is tied to the URL it was extracted from; editing the URL clears it.
 - New regression tests: tests/test_provider_robustness.py.
+
+
+XENO v7.2: GITHUB PAGES FRONTEND + SEPARATE BACKEND
+--------------------------------------------------
+- GitHub Pages শুধু static file চালায়, Python backend চালায় না। Backend আলাদা জায়গায় (যেমন Render) চালাতে হবে।
+- Frontend-এর backend URL ঠিক করতে `static/js/config.js`-এ `window.XENO_API_BASE = "https://your-api-url"` লিখুন।
+- Backend-কে Pages থেকে ডাকার অনুমতি দিতে `.env` বা hosting-এর environment-এ `XENO_CORS_ORIGINS=https://YOUR-USER.github.io` দিন।
+  এই মান ফাঁকা থাকলে cross-origin অনুরোধ বন্ধ থাকে (ডিফল্ট নিরাপদ)। নিজের machine-এ backend page সরাসরি serve করলে এটা লাগবে না।
+- সব asset ও link এখন relative path, তাই `username.github.io/repo/` এবং নিজের server, দুই জায়গাতেই ঠিক কাজ করে।
+- `static/js/config.js` ফাঁকা রেখে GitHub Pages খুললে পেজ স্পষ্ট বার্তা দেখায়, "Checking API…" আটকে থাকে না।
+- `.nojekyll` যোগ করা হয়েছে, যাতে Pages ফাইল প্রক্রিয়াকরণে বাধা না দেয়।

@@ -1,9 +1,11 @@
+import os
 import uuid
 from dotenv import load_dotenv
 load_dotenv()
 from contextlib import asynccontextmanager
 from pathlib import Path
 from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, HttpUrl, Field
@@ -23,6 +25,11 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="XENO API", version="1.5.0",
               description="Original API for XENO website and Telegram bot.",
               lifespan=lifespan)
+# Cross-origin access is opt-in: only origins listed in XENO_CORS_ORIGINS may call the API from a browser.
+CORS_ORIGINS = [o.strip().rstrip("/") for o in os.getenv("XENO_CORS_ORIGINS", "").split(",") if o.strip()]
+if CORS_ORIGINS:
+    app.add_middleware(CORSMiddleware, allow_origins=CORS_ORIGINS,
+                       allow_methods=["GET", "POST", "OPTIONS"], allow_headers=["Content-Type"])
 app.mount("/static", StaticFiles(directory=BASE / "static"), name="static")
 
 class PostRequest(BaseModel):
