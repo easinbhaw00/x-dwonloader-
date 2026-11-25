@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080c16">
+<title>XENO — Media Utility</title>
+<meta name="description" content="XENO is an original media utility for links and media you are authorized to access.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'>%3Crect width='32' height='32' rx='9' fill='%23080c16'/%3E%3Ctext x='16' y='22' font-family='Arial' font-size='18' font-weight='700' text-anchor='middle' fill='%2353e0d0'%3EX%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<header class="top"><a class="brand" href="/">XENO<span>.</span></a><div><a href="#status">System</a><button id="theme" type="button" aria-label="Toggle light and dark theme" aria-pressed="false">◐</button></div></header>
+<main>
+<section class="hero"><div class="eyebrow">INDEPENDENT MEDIA UTILITY</div><h1>Make your next<br><em>media step simple.</em></h1><p>Paste a public X post URL, choose an available MP4 quality, and download. Requires authorized X API access.</p></section>
+<section class="panel">
+<div class="panel-head"><div><small>01 / LINK CHECK</small><h2>Check an X post</h2></div><span class="pill">URL VALIDATION</span></div>
+<form id="xform"><label for="xurl">X post URL</label><div class="field"><input id="xurl" type="url" placeholder="https://x.com/username/status/..." required><button type="button" id="paste">Paste</button></div><div class="actions"><button class="action" type="submit">Check link <span>↗</span></button><button class="action secondary-action" type="button" id="extract">Get video & qualities <span>⌕</span></button></div></form><div id="xresult" class="result" aria-live="polite"></div>
+<div class="notice">A valid link does not guarantee that its video can be retrieved. Private and protected posts are not supported.</div>
+</section>
+<section class="panel secondary">
+<div class="panel-head"><div><small>02 / APPROVED MEDIA</small><h2>Download direct media</h2></div><span class="pill muted">ALLOWLIST ONLY</span></div>
+<p class="muted-text">For testing, enter a direct HTTPS video URL hosted on a domain configured by the server operator. Arbitrary URLs are blocked.</p>
+<form id="dform"><label for="mediaurl">Direct media URL</label><input id="mediaurl" type="url" placeholder="https://approved-host.example/video.mp4" required><label for="filename">Save as</label><input id="filename" type="text" value="video.mp4" maxlength="100"><button class="action" type="submit">Start download <span>↓</span></button></form><div id="dresult" class="result" aria-live="polite"></div>
+</section>
+<section class="status" id="status"><small>03 / SERVICE STATUS</small><h2>System overview</h2><pre id="health">Checking API…</pre></section>
+</main>
+<footer><b>XENO.</b><span>Original project · Use only media you are authorized to download.</span></footer>
+<script src="/static/js/app.js" defer></script>
+</body></html>
